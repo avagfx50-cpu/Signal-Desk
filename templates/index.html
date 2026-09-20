@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BlueSky Signal Desk</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#edf3ff',
+            coral: '#ff8d78',
+            mint: '#9fecc4',
+            fog: '#111821',
+            lilac: '#cbbdff',
+            sky: '#9ecafc'
+          },
+          boxShadow: {
+            soft: '0 24px 80px rgba(0, 0, 0, 0.22)',
+            panel: '0 18px 50px rgba(0, 0, 0, 0.16)'
+          },
+          fontFamily: {
+            display: ['Georgia', 'serif'],
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #0a0d12;
+      --bg-2: #111821;
+      --panel: rgba(17, 22, 30, 0.78);
+      --panel-strong: rgba(20, 26, 32, 0.96);
+      --panel-soft: rgba(28, 33, 40, 0.82);
+      --card: rgba(22, 28, 35, 0.9);
+      --card-alt: rgba(16, 21, 27, 0.92);
+      --ink: #edf3ff;
+      --muted: rgba(237, 243, 255, 0.72);
+      --muted-2: rgba(237, 243, 255, 0.5);
+      --line: rgba(255, 255, 255, 0.08);
+      --line-soft: rgba(255, 255, 255, 0.04);
+      --coral: #ff8d78;
+      --mint: #9fecc4;
+      --sky: #9ecafc;
+      --lavender: #cbbdff;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    body {
+      --bg: #0a0d12;
+      --bg-2: #111821;
+      --panel: rgba(17, 22, 30, 0.78);
+      --panel-strong: rgba(20, 26, 32, 0.96);
+      --panel-soft: rgba(28, 33, 40, 0.82);
+      --card: rgba(22, 28, 35, 0.9);
+      --card-alt: rgba(16, 21, 27, 0.92);
+      --ink: #edf3ff;
+      --muted: rgba(237, 243, 255, 0.72);
+      --line: rgba(255, 255, 255, 0.08);
+      --line-soft: rgba(255, 255, 255, 0.04);
+      background:
+        radial-gradient(circle at top right, rgba(125, 155, 164, 0.19), transparent 22%),
+        radial-gradient(circle at left bottom, rgba(65, 91, 126, 0.2), transparent 30%),
+        linear-gradient(180deg, #0a0d12 0%, #0d1218 100%);
+      color: var(--ink);
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    body:not(.dark) {
+      --bg: #f4f3ef;
+      --bg-2: #eef1f5;
+      --panel: rgba(255, 255, 255, 0.78);
+      --panel-strong: rgba(255, 255, 255, 0.92);
+      --panel-soft: rgba(247, 249, 252, 0.9);
+      --card: rgba(255, 255, 255, 0.82);
+      --card-alt: rgba(248, 249, 252, 0.92);
+      --ink: #1b2430;
+      --muted: rgba(27, 36, 48, 0.72);
+      --line: rgba(27, 36, 48, 0.12);
+      --line-soft: rgba(27, 36, 48, 0.08);
+      background:
+        radial-gradient(circle at top right, rgba(182, 200, 211, 0.28), transparent 22%),
+        linear-gradient(180deg, #f3f0ed 0%, #f7f5f2 100%);
+      color: var(--ink);
+    }
+
+    body:not(.dark) .text-ink,
+    body:not(.dark) .text-ink\/65,
+    body:not(.dark) .text-ink\/50,
+    body:not(.dark) .text-ink\/45,
+    body:not(.dark) .text-ink\/60,
+    body:not(.dark) .text-ink\/70,
+    body:not(.dark) .text-ink\/55,
+    body:not(.dark) .text-ink\/80,
+    body:not(.dark) #status-text,
+    body:not(.dark) #mode,
+    body:not(.dark) #target-count,
+    body:not(.dark) h1,
+    body:not(.dark) h2,
+    body:not(.dark) h3,
+    body:not(.dark) th,
+    body:not(.dark) td,
+    body:not(.dark) .font-display,
+    body:not(.dark) .font-bold,
+    body:not(.dark) .font-semibold {
+      color: var(--ink) !important;
+    }
+
+    .grain {
+      background-image: none;
+    }
+
+    .glass {
+      background: linear-gradient(180deg, rgba(19, 24, 32, 0.92), rgba(13, 18, 24, 0.88));
+      border: 1px solid var(--line);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .stat-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(20, 25, 32, 0.96), rgba(13, 18, 24, 0.9));
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      inset: -35% auto auto -12%;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      opacity: 0.12;
+      background: radial-gradient(circle, rgba(255, 141, 120, 0.8), transparent 62%);
+    }
+
+    .mini-chart {
+      overflow: hidden;
+      border-radius: 18px;
+      height: 80px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--line-soft);
+    }
+
+    .mini-chart svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .mini-chart path {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      animation: drawLine 1.6s ease forwards;
+    }
+
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .panel-scroll::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .panel-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+    }
+
+    header {
+      background: linear-gradient(180deg, rgba(15, 20, 27, 0.9), rgba(11, 15, 20, 0.82));
+      border: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 48px rgba(0,0,0,0.18);
+    }
+
+    body:not(.dark) header {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(248, 249, 252, 0.82));
+      border-color: rgba(27, 36, 48, 0.08);
+      box-shadow: 0 18px 48px rgba(16, 24, 31, 0.08);
+    }
+
+    #theme-toggle {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #f3f7ff;
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    input {
+      background: rgba(255,255,255,0.03) !important;
+      border-color: rgba(255,255,255,0.1) !important;
+      color: #f3f7ff !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+
+    button,
+    a,
+    table,
+    thead th,
+    tbody tr {
+      border-color: var(--line) !important;
+    }
+
+    #logs {
+      background: rgba(7, 11, 15, 0.96) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    body.dark .text-ink,
+    body.dark .text-ink\/65,
+    body.dark .text-ink\/50,
+    body.dark .text-ink\/45,
+    body.dark .text-ink\/60,
+    body.dark .text-ink\/70,
+    body.dark .text-ink\/55,
+    body.dark .text-ink\/80,
+    body.dark #status-text,
+    body.dark #mode,
+    body.dark #stat-status,
+    body.dark #stat-targets,
+    body.dark #stat-keywords,
+    body.dark #stat-mode,
+    body.dark #target-count,
+    body.dark h1,
+    body.dark h2,
+    body.dark h3,
+    body.dark th,
+    body.dark td,
+    body.dark .font-display,
+    body.dark .font-bold,
+    body.dark .font-semibold {
+      color: var(--ink) !important;
+    }
+
+    body.dark .text-ink\/65,
+    body.dark .text-ink\/50,
+    body.dark .text-ink\/45,
+    body.dark .text-ink\/60,
+    body.dark .text-ink\/70,
+    body.dark .text-ink\/55,
+    body.dark .text-ink\/80,
+    body.dark #mode,
+    body.dark #target-count {
+      color: var(--muted) !important;
+    }
+
+    .text-coral {
+      color: var(--coral) !important;
+    }
+
+    .bg-coral {
+      background-color: var(--coral) !important;
+    }
+
+    .bg-mint {
+      background-color: var(--mint) !important;
+    }
+
+    .text-ink {
+      color: var(--ink) !important;
+    }
+
+    .targets-table {
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+
+    .targets-table thead th {
+      color: var(--muted-2) !important;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      padding-bottom: 10px;
+    }
+
+    .target-row td {
+      background: rgba(255, 255, 255, 0.035);
+      border-top: 1px solid var(--line-soft);
+      border-bottom: 1px solid var(--line-soft);
+      padding-top: 14px;
+      padding-bottom: 14px;
+    }
+
+    .target-row td:first-child {
+      border-left: 1px solid var(--line-soft);
+      border-radius: 14px 0 0 14px;
+    }
+
+    .target-row td:last-child {
+      border-right: 1px solid var(--line-soft);
+      border-radius: 0 14px 14px 0;
+    }
+
+    .target-row:hover td {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-badge::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .status-followed {
+      color: #9fecc4;
+      background: rgba(159, 236, 196, 0.1);
+      border-color: rgba(159, 236, 196, 0.2);
+    }
+
+    .status-discovered {
+      color: #f3c875;
+      background: rgba(243, 200, 117, 0.1);
+      border-color: rgba(243, 200, 117, 0.2);
+    }
+
+    .status-failed {
+      color: #ff9b8b;
+      background: rgba(255, 141, 120, 0.1);
+      border-color: rgba(255, 141, 120, 0.2);
+    }
+
+    .targets-empty {
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      color: var(--muted-2);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Final graphite theme: keep every dashboard surface on the same visual plane. */
+    html {
+      background: #0b0f14;
+    }
+
+    body,
+    body.dark {
+      background-color: #0b0f14 !important;
+      background-image:
+        radial-gradient(circle at 88% 0%, rgba(255, 121, 98, 0.1), transparent 24%),
+        radial-gradient(circle at 0% 72%, rgba(73, 151, 154, 0.08), transparent 26%),
+        linear-gradient(180deg, #0b0f14 0%, #0e141b 52%, #0b1016 100%) !important;
+      color: #eef2f5 !important;
+    }
+
+    body.dark .glass,
+    body.dark header {
+      background: rgba(19, 26, 34, 0.92) !important;
+      border-color: rgba(255, 255, 255, 0.09) !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.24) !important;
+    }
+
+    body.dark .stat-card {
+      background: linear-gradient(145deg, #19222c 0%, #141b23 100%) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    body.dark .bg-ink {
+      background-color: #151d26 !important;
+    }
+
+    body.dark .bg-white\/5,
+    body.dark .bg-white\/8 {
+      background-color: rgba(255, 255, 255, 0.06) !important;
+    }
+
+    body.dark #logs {
+      background: #0a1016 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    body.dark .target-row td {
+      background: rgba(255, 255, 255, 0.035) !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    body.dark .target-row:hover td {
+      background: rgba(255, 255, 255, 0.075) !important;
+    }
+
+    body.dark input {
+      background: #111820 !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+      color: #eef2f5 !important;
+    }
+
+    body.dark input::placeholder {
+      color: rgba(238, 242, 245, 0.42);
+    }
+
+    body.dark .text-coral {
+      color: #ff907d !important;
+    }
+
+    body.dark .bg-mint {
+      background-color: #9ce4be !important;
+      color: #10231f !important;
+    }
+
+    body.dark .bg-sky\/80 {
+      background-color: #8cbde9 !important;
+      color: #11202d !important;
+    }
+
+    body.dark .bg-lilac\/80 {
+      background-color: #b8c1e8 !important;
+      color: #1d2434 !important;
+    }
+
+    body.dark .rounded-\[28px\].bg-ink {
+      background: linear-gradient(145deg, #17232b 0%, #121a22 100%) !important;
+      border: 1px solid rgba(126, 224, 202, 0.14);
+    }
+
+    body.dark .rounded-\[28px\].bg-ink .text-mint {
+      color: #9ce4be !important;
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding-top: 16px !important;
+        padding-bottom: 24px !important;
+      }
+
+      .targets-table {
+        min-width: 620px;
+      }
+    }
+  </style>
+</head>
+  <body class="dark min-h-screen text-ink font-sans grain">
+  <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <header class="mb-8 rounded-[28px] border border-white/10 bg-[#0d131a]/90 p-5 shadow-soft backdrop-blur-sm md:p-7">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-xl">
+          <p class="mb-3 text-[11px] font-bold uppercase tracking-[0.28em] text-coral">Automation console / 01</p>
+          <h1 class="font-display text-5xl leading-[0.9] text-ink md:text-7xl">
+            Signal<br><span class="text-coral">Desk.</span>
+          </h1>
+          <p class="mt-4 text-sm leading-6 text-ink/65 md:text-[15px]">
+            Discover relevant creators from the people engaging with BlueSky conversations. Deliberate, observable, and rate-aware.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 self-start rounded-full border border-ink/10 bg-white/5 px-4 py-2.5 text-sm shadow-sm md:self-end">
+          <button id="theme-toggle" class="mr-1 rounded-full border border-ink/10 bg-white/8 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition hover:-translate-y-0.5">Dark</button>
+          <span id="status-dot" class="h-2.5 w-2.5 rounded-full bg-ink/30"></span>
+          <span id="status-text" class="font-semibold text-ink">stopped</span>
+          <span id="mode" class="border-l border-ink/15 pl-3 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">dry run</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="stat-card rounded-[26px] p-4">
+        <div class="relative z-10 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">Status</p>
+            <h3 id="stat-status" class="mt-3 text-2xl font-bold text-ink">Stopped</h3>
+          </div>
+          <span class="rounded-full bg-mint/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-ink">live</span>
+        </div>
+        <div class="mini-chart mt-4">
+          <svg viewBox="0 0 220 80" aria-hidden="true">
+            <path d="M0 60 L45 52 L90 44 L120 48 L160 30 L220 18" stroke="#50c890" stroke-width="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-[26px] p-4">
+        <div class="relative z-10 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">Targets</p>
+            <h3 id="stat-targets" class="mt-3 text-2xl font-bold text-ink">0</h3>
+          </div>
+          <span class="rounded-full bg-sky/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-ink">db</span>
+        </div>
+        <div class="mini-chart mt-4">
+          <svg viewBox="0 0 220 80" aria-hidden="true">
+            <path d="M0 62 L40 58 L80 50 L120 40 L160 26 L220 22" stroke="#6aa9ff" stroke-width="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-[26px] p-4">
+        <div class="relative z-10 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">Keywords</p>
+            <h3 id="stat-keywords" class="mt-3 text-2xl font-bold text-ink">0</h3>
+          </div>
+          <span class="rounded-full bg-lilac/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-ink">scan</span>
+        </div>
+        <div class="mini-chart mt-4">
+          <svg viewBox="0 0 220 80" aria-hidden="true">
+            <path d="M0 50 L30 58 L70 48 L110 36 L150 30 L220 18" stroke="#d091ff" stroke-width="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-[26px] p-4">
+        <div class="relative z-10 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">Mode</p>
+            <h3 id="stat-mode" class="mt-3 text-2xl font-bold text-ink">Dry run</h3>
+          </div>
+          <span class="rounded-full bg-coral/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-coral">guard</span>
+        </div>
+        <div class="mini-chart mt-4">
+          <svg viewBox="0 0 220 80" aria-hidden="true">
+            <path d="M0 66 L42 54 L86 52 L125 42 L160 38 L220 14" stroke="#ff9d7d" stroke-width="3"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-8 grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
+      <div class="space-y-5">
+        <div class="rounded-[28px] bg-ink p-6 text-white shadow-panel">
+          <div class="mb-7 flex items-center justify-between">
+            <h2 class="font-display text-2xl text-white">Control room</h2>
+            <span class="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-mint">guarded</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="control('start')" class="rounded-2xl bg-coral px-4 py-3 text-sm font-bold text-white shadow-lg shadow-coral/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#ff9d8a] hover:text-white">Start</button>
+            <button onclick="control('pause')" class="rounded-2xl border border-white/20 bg-white/8 px-4 py-3 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-ink">Pause</button>
+            <button onclick="control('resume')" class="rounded-2xl border border-white/20 bg-white/8 px-4 py-3 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-ink">Resume</button>
+            <button onclick="control('stop')" class="rounded-2xl border border-white/20 bg-white/8 px-4 py-3 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-ink">Stop</button>
+          </div>
+
+          <p class="mt-5 text-xs leading-5 text-white/60">
+            Follow actions are governed by the daily cap and randomized delay configured in <span class="font-semibold text-white/85">.env</span>.
+          </p>
+        </div>
+
+        <div class="glass rounded-[28px] p-6">
+          <h2 class="font-display text-2xl text-ink">Target profile</h2>
+
+          <div class="mt-5 flex items-center justify-between rounded-2xl border border-ink/10 bg-white/5 px-4 py-3">
+            <div>
+              <p class="text-sm font-bold text-ink">Dry run mode</p>
+              <p id="dry-run-help" class="mt-1 text-xs text-ink/55">No accounts will be followed.</p>
+            </div>
+            <button id="dry-run-toggle" type="button" role="switch" aria-checked="true" onclick="toggleDryRun()" class="relative h-7 w-12 rounded-full bg-mint p-1 transition duration-200" aria-label="Toggle dry run mode">
+              <span class="dry-run-knob block h-5 w-5 translate-x-5 rounded-full bg-[#10212c] shadow-sm transition duration-200"></span>
+            </button>
+          </div>
+
+          <label class="mt-5 block text-[11px] font-bold uppercase tracking-[0.22em] text-ink/50">Search keywords</label>
+          <input id="keywords" class="mt-2 w-full rounded-2xl border border-ink/10 bg-fog px-3.5 py-3 text-sm text-ink outline-none transition focus:border-coral focus:ring-2 focus:ring-coral/20" value="{{ settings.search_keywords | join(', ') }}">
+
+          <label class="mt-4 block text-[11px] font-bold uppercase tracking-[0.22em] text-ink/50">Max followers (strictly below)</label>
+          <input id="max-followers" type="number" min="1" class="mt-2 w-full rounded-2xl border border-ink/10 bg-fog px-3.5 py-3 text-sm text-ink outline-none transition focus:border-coral focus:ring-2 focus:ring-coral/20" value="{{ settings.max_followers }}">
+
+          <button onclick="saveSettings()" class="mt-5 w-full rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-[#10212c] shadow-lg shadow-mint/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#b9f3d0] hover:text-[#10212c]">Apply filters</button>
+        </div>
+
+        <div class="glass rounded-[28px] p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-coral">Manual source</p>
+              <h2 class="mt-1 font-display text-2xl text-ink">Import likers</h2>
+            </div>
+            <span class="rounded-full border border-mint/20 bg-mint/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-mint">Bluesky</span>
+          </div>
+          <p class="mt-3 text-xs leading-5 text-ink/60">Paste a public post URL. Matching likers will be added to the creators list and handled by your current dry-run and follow limits.</p>
+          <input id="post-url" class="mt-4 w-full rounded-2xl border border-ink/10 bg-fog px-3.5 py-3 text-sm text-ink outline-none transition focus:border-coral focus:ring-2 focus:ring-coral/20" placeholder="https://bsky.app/profile/.../post/...">
+          <button id="import-likers" onclick="importLikers()" class="mt-3 w-full rounded-2xl bg-coral px-4 py-3 text-sm font-bold text-white shadow-lg shadow-coral/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#ff9d8a]">Import likers</button>
+          <p id="import-result" class="mt-3 min-h-5 text-xs text-ink/55"></p>
+        </div>
+      </div>
+
+      <div class="glass rounded-[28px] p-6">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-coral">Activity stream</p>
+            <h2 class="font-display text-3xl text-ink">Live logs</h2>
+          </div>
+          <span id="target-count" class="rounded-full bg-mint px-3 py-1 text-[11px] font-bold text-ink">0 targets</span>
+        </div>
+
+        <div id="logs" class="panel-scroll mt-6 h-[360px] overflow-y-auto rounded-[22px] bg-ink p-4 font-mono text-[12px] leading-6 text-mint shadow-inner">
+          <div class="text-white/45">Waiting for worker activity...</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass rounded-[28px] p-5 md:p-6">
+      <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-coral">Prospects</p>
+          <h2 class="font-display text-3xl text-ink">Discovered creators</h2>
+        </div>
+        <a href="/api/export.csv" class="rounded-2xl border border-white/10 bg-white/8 px-4 py-2 text-center text-sm font-bold text-white transition duration-200 hover:bg-white hover:text-ink">Export CSV</a>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="targets-table w-full min-w-[680px] text-left text-sm">
+          <thead>
+            <tr>
+              <th class="px-3 py-3 font-semibold">Handle</th>
+              <th class="px-3 py-3 font-semibold">Followers</th>
+              <th class="px-3 py-3 font-semibold">Matched keyword</th>
+              <th class="px-3 py-3 font-semibold">Status</th>
+              <th class="px-3 py-3 font-semibold">Followed</th>
+            </tr>
+          </thead>
+          <tbody id="targets" class="divide-y divide-ink/10"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const body = document.body;
+    const themeToggle = document.getElementById('theme-toggle');
+
+    function applyTheme(theme) {
+      const dark = theme === 'dark';
+      body.classList.toggle('dark', dark);
+      themeToggle.textContent = dark ? 'Light' : 'Dark';
+      localStorage.setItem('signal-desk-theme', theme);
+    }
+
+    const savedTheme = localStorage.getItem('signal-desk-theme') || 'dark';
+    body.classList.add('dark');
+    applyTheme(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = body.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(nextTheme);
+    });
+
+    async function request(path, options = {}) {
+      const response = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Request failed');
+      return data;
+    }
+
+    async function control(action) {
+      try {
+        await request('/api/' + action, { method: 'POST' });
+        refresh();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function saveSettings() {
+      const keywords = document.getElementById('keywords').value.split(',').map(value => value.trim()).filter(Boolean);
+      const max_followers = Number(document.getElementById('max-followers').value);
+      const dry_run = document.getElementById('dry-run-toggle').getAttribute('aria-checked') === 'true';
+      try {
+        await request('/api/settings', { method: 'POST', body: JSON.stringify({ keywords, max_followers, dry_run }) });
+        refresh();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    function renderDryRun(enabled) {
+      const toggle = document.getElementById('dry-run-toggle');
+      const knob = toggle.querySelector('.dry-run-knob');
+      const help = document.getElementById('dry-run-help');
+      toggle.setAttribute('aria-checked', String(enabled));
+      toggle.classList.toggle('bg-mint', enabled);
+      toggle.classList.toggle('bg-coral', !enabled);
+      knob.classList.toggle('translate-x-5', enabled);
+      knob.classList.toggle('translate-x-0', !enabled);
+      help.textContent = enabled ? 'No accounts will be followed.' : 'Live mode: matching accounts may be followed.';
+    }
+
+    async function toggleDryRun() {
+      const toggle = document.getElementById('dry-run-toggle');
+      const enabled = toggle.getAttribute('aria-checked') !== 'true';
+      renderDryRun(enabled);
+      try {
+        const keywords = document.getElementById('keywords').value.split(',').map(value => value.trim()).filter(Boolean);
+        const max_followers = Number(document.getElementById('max-followers').value);
+        await request('/api/settings', { method: 'POST', body: JSON.stringify({ keywords, max_followers, dry_run: enabled }) });
+        refresh();
+      } catch (error) {
+        renderDryRun(!enabled);
+        alert(error.message);
+      }
+    }
+
+    async function importLikers() {
+      const input = document.getElementById('post-url');
+      const button = document.getElementById('import-likers');
+      const result = document.getElementById('import-result');
+      const post_url = input.value.trim();
+      if (!post_url) {
+        result.textContent = 'Paste a Bluesky post URL first.';
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Importing...';
+      result.textContent = 'Resolving post and checking likers...';
+      try {
+        const data = await request('/api/import-likers', { method: 'POST', body: JSON.stringify({ post_url }) });
+        result.textContent = `${data.matched} matching liker${data.matched === 1 ? '' : 's'} added.`;
+        refresh();
+      } catch (error) {
+        result.textContent = error.message;
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Import likers';
+      }
+    }
+
+    function badge(status) {
+      const colors = {
+        followed: 'status-followed',
+        discovered: 'status-discovered',
+        follow_failed: 'status-failed'
+      };
+      return `<span class="status-badge ${colors[status] || 'status-discovered'}">${status.replace('_', ' ')}</span>`;
+    }
+
+    async function refresh() {
+      try {
+        const data = await request('/api/status');
+        const keywordCount = document.getElementById('keywords').value.split(',').map(value => value.trim()).filter(Boolean).length;
+
+        document.getElementById('status-text').textContent = data.status;
+        document.getElementById('status-dot').className = `h-2.5 w-2.5 rounded-full ${data.status === 'running' ? 'bg-mint' : data.status === 'error' ? 'bg-coral' : 'bg-white/30'}`;
+        document.getElementById('mode').textContent = data.dry_run ? 'dry run' : 'live mode';
+        document.getElementById('stat-status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+        document.getElementById('stat-targets').textContent = String(data.targets.length);
+        document.getElementById('stat-keywords').textContent = String(keywordCount);
+        document.getElementById('stat-mode').textContent = data.dry_run ? 'Dry run' : 'Live';
+        renderDryRun(data.dry_run);
+
+        document.getElementById('target-count').textContent = `${data.targets.length} targets`;
+        document.getElementById('logs').innerHTML = data.logs.length
+          ? data.logs.map(log => `<div><span class="text-white/40">${log.timestamp}</span> ${log.message}</div>`).join('')
+          : '<div class="text-white/45">Waiting for worker activity...</div>';
+
+        const rows = data.targets.map(item => `
+          <tr class="target-row align-middle transition duration-200">
+            <td class="px-3 font-bold text-ink">@${item.handle}</td>
+            <td class="px-3 text-ink/70">${item.follower_count}</td>
+            <td class="px-3 text-ink/60">${item.matched_keyword}</td>
+            <td class="px-3">${badge(item.status)}</td>
+            <td class="px-3 text-[11px] text-ink/55">${item.followed_at_timestamp || '-'}</td>
+          </tr>
+        `).join('');
+
+        document.getElementById('targets').innerHTML = rows || '<tr><td colspan="5" class="targets-empty px-3 py-10 text-center">No targets discovered yet.</td></tr>';
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>
+
