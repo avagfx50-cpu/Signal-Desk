@@ -105,7 +105,7 @@ async def healthcheck():
 @app.get("/api/status")
 async def api_status():
     with session_factory() as session:
-        targets = list_targets(session, 500)
+        targets = list_targets(session)
         counts = target_counts(session)
     return {
         "status": worker.status,

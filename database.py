@@ -76,8 +76,11 @@ def mark_failed(session: Session, did: str, reason: str = "failed") -> None:
         session.commit()
 
 
-def list_targets(session: Session, limit: int = 500) -> list[TargetUser]:
-    return list(session.scalars(select(TargetUser).order_by(TargetUser.id.desc()).limit(limit)))
+def list_targets(session: Session, limit: int | None = None) -> list[TargetUser]:
+    query = select(TargetUser).order_by(TargetUser.id.desc())
+    if limit is not None:
+        query = query.limit(limit)
+    return list(session.scalars(query))
 
 
 def target_counts(session: Session) -> dict[str, int]:
