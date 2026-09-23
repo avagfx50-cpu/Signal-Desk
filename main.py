@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from bsky_client import BlueSkyClient
 from config import get_settings
-from database import create_database, list_targets, target_counts
+from database import count_follows_today, create_database, list_targets, target_counts
 from worker import BotWorker
 
 settings = get_settings()
@@ -107,12 +107,15 @@ async def api_status():
     with session_factory() as session:
         targets = list_targets(session)
         counts = target_counts(session)
+        follows_today = count_follows_today(session)
     return {
         "status": worker.status,
         "last_error": worker.last_error,
         "dry_run": settings.dry_run,
         "account_handle": settings.bsky_handle,
         "target_counts": counts,
+        "follows_today": follows_today,
+        "max_follows_per_day": settings.max_follows_per_day,
         "logs": list(logs),
         "targets": [
             {

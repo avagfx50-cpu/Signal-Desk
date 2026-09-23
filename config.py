@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     dry_run: bool = Field(default=True, validation_alias="DRY_RUN")
     follow_delay_min_seconds: int = Field(default=15, ge=1, validation_alias="FOLLOW_DELAY_MIN_SECONDS")
     follow_delay_max_seconds: int = Field(default=40, ge=1, validation_alias="FOLLOW_DELAY_MAX_SECONDS")
-    max_follows_per_day: int = Field(default=20, ge=0, validation_alias="MAX_FOLLOWS_PER_DAY")
+    max_follows_per_day: int = Field(default=250, ge=0, validation_alias="MAX_FOLLOWS_PER_DAY")
     max_followers: int = Field(default=300, ge=1, validation_alias="MAX_FOLLOWERS")
     search_keywords: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["furry art", "3d model", "2d model", "vtuber"],
