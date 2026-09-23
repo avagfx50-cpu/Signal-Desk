@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
     log_file: str = Field(default="logs/bsky-bot.log", validation_alias="LOG_FILE")
     dry_run: bool = Field(default=True, validation_alias="DRY_RUN")
-    follow_delay_min_seconds: int = Field(default=5, ge=1, validation_alias="FOLLOW_DELAY_MIN_SECONDS")
-    follow_delay_max_seconds: int = Field(default=12, ge=1, validation_alias="FOLLOW_DELAY_MAX_SECONDS")
+    follow_delay_min_seconds: int = Field(default=15, ge=1, validation_alias="FOLLOW_DELAY_MIN_SECONDS")
+    follow_delay_max_seconds: int = Field(default=40, ge=1, validation_alias="FOLLOW_DELAY_MAX_SECONDS")
     max_follows_per_day: int = Field(default=20, ge=0, validation_alias="MAX_FOLLOWS_PER_DAY")
     max_followers: int = Field(default=300, ge=1, validation_alias="MAX_FOLLOWERS")
     search_keywords: Annotated[list[str], NoDecode] = Field(
