@@ -80,6 +80,15 @@ def list_targets(session: Session, limit: int = 500) -> list[TargetUser]:
     return list(session.scalars(select(TargetUser).order_by(TargetUser.id.desc()).limit(limit)))
 
 
+def target_counts(session: Session) -> dict[str, int]:
+    rows = session.execute(select(TargetUser.status, func.count(TargetUser.id)).group_by(TargetUser.status)).all()
+    counts = {status: int(total) for status, total in rows}
+    counts["total"] = sum(counts.values())
+    counts["followed"] = counts.get("followed", 0)
+    counts["pending"] = counts["total"] - counts["followed"]
+    return counts
+
+
 def count_follows_today(session: Session) -> int:
     start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     return int(session.scalar(select(func.count(TargetUser.id)).where(TargetUser.followed_at_timestamp >= start)) or 0)

@@ -4,6 +4,7 @@ import logging
 from collections import deque
 from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
@@ -12,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from bsky_client import BlueSkyClient
 from config import get_settings
-from database import create_database, list_targets
+from database import create_database, list_targets, target_counts
 from worker import BotWorker
 
 settings = get_settings()
@@ -40,6 +41,22 @@ worker = BotWorker(settings, session_factory, client, publish_log)
 templates = Jinja2Templates(directory="templates")
 
 
+def update_env_file(key: str, value: str) -> None:
+    env_path = Path(".env")
+    raw_lines = env_path.read_text(encoding="utf-8").splitlines() if env_path.exists() else []
+    new_lines = []
+    updated = False
+    for line in raw_lines:
+        if line.strip().startswith(f"{key}="):
+            new_lines.append(f"{key}={value}")
+            updated = True
+        else:
+            new_lines.append(line)
+    if not updated:
+        new_lines.append(f"{key}={value}")
+    env_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("BlueSky Automation Bot ready")
@@ -60,6 +77,11 @@ class SettingsUpdate(BaseModel):
 
 class PostImport(BaseModel):
     post_url: str = Field(min_length=1, max_length=500)
+
+
+class AccountConfig(BaseModel):
+    bsky_handle: str = Field(min_length=1, max_length=200)
+    bsky_app_password: str = Field(min_length=1, max_length=500)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -84,10 +106,13 @@ async def healthcheck():
 async def api_status():
     with session_factory() as session:
         targets = list_targets(session, 500)
+        counts = target_counts(session)
     return {
         "status": worker.status,
         "last_error": worker.last_error,
         "dry_run": settings.dry_run,
+        "account_handle": settings.bsky_handle,
+        "target_counts": counts,
         "logs": list(logs),
         "targets": [
             {
@@ -143,6 +168,27 @@ async def api_settings(update: SettingsUpdate):
         publish_log(f"Mode changed to {'dry run' if settings.dry_run else 'live mode'}")
     publish_log(f"Settings updated: {len(settings.search_keywords)} keywords, < {settings.max_followers} followers")
     return {"keywords": settings.search_keywords, "max_followers": settings.max_followers, "dry_run": settings.dry_run}
+
+
+@app.post("/api/account")
+async def api_account(update: AccountConfig):
+    handle = update.bsky_handle.strip().lstrip("@")
+    password = update.bsky_app_password.strip()
+    if not handle:
+        raise HTTPException(400, "BlueSky handle cannot be empty")
+    if not password:
+        raise HTTPException(400, "BlueSky App Password cannot be empty")
+
+    settings.bsky_handle = handle
+    settings.bsky_app_password = password
+    client.handle = handle
+    client.app_password = password
+    client.logged_in = False
+
+    update_env_file("BSKY_HANDLE", handle)
+    update_env_file("BSKY_APP_PASSWORD", password)
+    publish_log(f"Account updated to @{handle}")
+    return {"handle": handle, "status": worker.status}
 
 
 @app.post("/api/import-likers")

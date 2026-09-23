@@ -50,6 +50,43 @@
       --shadow: rgba(0, 0, 0, 0.35);
     }
 
+    @keyframes floaty {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(0, -8px, 0) scale(1.02); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(159, 236, 196, 0.35); }
+      50% { box-shadow: 0 0 0 8px rgba(159, 236, 196, 0); }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+
+    @keyframes drift {
+      0% { transform: translateY(-10px) translateX(0) scale(1); }
+      50% { transform: translateY(12px) translateX(12px) scale(1.08); }
+      100% { transform: translateY(-10px) translateX(-8px) scale(1); }
+    }
+
     body {
       --bg: #0a0d12;
       --bg-2: #111821;
@@ -63,11 +100,13 @@
       --line: rgba(255, 255, 255, 0.08);
       --line-soft: rgba(255, 255, 255, 0.04);
       background:
-        radial-gradient(circle at top right, rgba(125, 155, 164, 0.19), transparent 22%),
-        radial-gradient(circle at left bottom, rgba(65, 91, 126, 0.2), transparent 30%),
-        linear-gradient(180deg, #0a0d12 0%, #0d1218 100%);
+        radial-gradient(circle at 20% 15%, rgba(126, 180, 255, 0.26), transparent 20%),
+        radial-gradient(circle at 80% 25%, rgba(77, 157, 255, 0.18), transparent 18%),
+        radial-gradient(circle at 50% 100%, rgba(182, 144, 255, 0.16), transparent 28%),
+        linear-gradient(180deg, #050a11 0%, #0b1017 38%, #070d13 100%);
       color: var(--ink);
       transition: background 0.35s ease, color 0.35s ease;
+      overflow-x: hidden;
     }
 
     body:not(.dark) {
@@ -110,8 +149,77 @@
       color: var(--ink) !important;
     }
 
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at center, rgba(110, 160, 255, 0.18), transparent 48%),
+        linear-gradient(180deg, rgba(5, 9, 16, 0.25), rgba(5, 9, 16, 0.64));
+    }
+
+    .starfield::before {
+      content: "";
+      position: absolute;
+      inset: -15%;
+      background-repeat: repeat;
+      background-size: 260px 260px;
+      opacity: 0.55;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.8), transparent 60%),
+        radial-gradient(1.5px 1.5px at 70% 50%, rgba(170,220,255,0.8), transparent 60%),
+        radial-gradient(1.8px 1.8px at 40% 70%, rgba(255,255,255,0.7), transparent 60%),
+        radial-gradient(1.5px 1.5px at 85% 22%, rgba(187,245,255,0.9), transparent 60%);
+      animation: twinkle 18s ease-in-out infinite alternate;
+    }
+
+    .starfield::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(130, 180, 255, 0.08), transparent 42%);
+      animation: drift 26s ease-in-out infinite alternate;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      border-radius: 9999px;
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.1;
+    }
+
+    body::before {
+      width: 320px;
+      height: 320px;
+      top: -100px;
+      right: -30px;
+      background: rgba(99, 179, 255, 0.18);
+      animation: floaty 16s ease-in-out infinite;
+    }
+
+    body::after {
+      width: 340px;
+      height: 340px;
+      bottom: -120px;
+      left: -40px;
+      background: rgba(170, 130, 255, 0.12);
+      animation: floaty 18s ease-in-out infinite reverse;
+    }
+
     .grain {
       background-image: none;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
     }
 
     .glass {
@@ -120,6 +228,7 @@
       box-shadow: 0 22px 60px rgba(0, 0, 0, 0.18);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      animation: fadeUp 0.7s ease-out both;
     }
 
     .stat-card {
@@ -128,6 +237,19 @@
       background: linear-gradient(180deg, rgba(20, 25, 32, 0.96), rgba(13, 18, 24, 0.9));
       border: 1px solid var(--line);
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+      animation: fadeUp 0.7s ease-out both;
+    }
+
+    .stat-card::after,
+    .glass::after,
+    .summary-tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%);
+      transform: translateX(-100%);
+      pointer-events: none;
+      opacity: 0.2;
     }
 
     .stat-card::before {
@@ -162,6 +284,17 @@
       stroke-dasharray: 400;
       stroke-dashoffset: 400;
       animation: drawLine 1.6s ease forwards;
+    }
+
+    .chart-glow {
+      filter: drop-shadow(0 0 10px rgba(142, 214, 255, 0.35));
+    }
+
+    .chart-grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
     }
 
     @keyframes drawLine {
@@ -217,6 +350,38 @@
     #logs {
       background: rgba(7, 11, 15, 0.96) !important;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    #logs > div {
+      display: flex;
+      gap: 0.75rem;
+      align-items: baseline;
+      min-height: 2rem;
+      padding: 0.45rem 0.65rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: rgba(207, 255, 230, 0.88);
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    #logs > div:last-child {
+      border-bottom: 0;
+    }
+
+    #logs > div > span {
+      flex: 0 0 auto;
+      color: rgba(255,255,255,0.42) !important;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    #logs > div:not(:only-child):hover {
+      background: rgba(255,255,255,0.045);
+    }
+
+    #status-dot {
+      animation: pulseGlow 2.2s infinite;
     }
 
     body.dark .text-ink,
@@ -292,6 +457,7 @@
       border-bottom: 1px solid var(--line-soft);
       padding-top: 14px;
       padding-bottom: 14px;
+      transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
     }
 
     .target-row td:first-child {
@@ -307,6 +473,37 @@
     .target-row:hover td {
       background: rgba(255, 255, 255, 0.07);
       border-color: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .summary-tile {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 18px;
+      padding: 14px 16px;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      animation: fadeUp 0.7s ease-out both;
+    }
+
+    .summary-tile p {
+      margin: 0;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+    }
+
+    .summary-tile strong {
+      font-size: 1.8rem;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.04em;
     }
 
     .status-badge {
@@ -320,6 +517,7 @@
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
     .status-badge::before {
@@ -453,10 +651,42 @@
       .targets-table {
         min-width: 620px;
       }
+
+      header {
+        padding: 1.1rem !important;
+      }
+
+      h1 {
+        font-size: 2.8rem !important;
+      }
+
+      .summary-tile strong {
+        font-size: 1.4rem !important;
+      }
+
+    }
+
+    @media (max-width: 768px) {
+      .glass,
+      .stat-card,
+      .summary-tile {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
   <body class="dark min-h-screen text-ink font-sans grain">
+  <div class="starfield"></div>
   <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <header class="mb-8 rounded-[28px] border border-white/10 bg-[#0d131a]/90 p-5 shadow-soft backdrop-blur-sm md:p-7">
       <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -465,19 +695,31 @@
           <h1 class="font-display text-5xl leading-[0.9] text-ink md:text-7xl">
             Signal<br><span class="text-coral">Desk.</span>
           </h1>
+          <div class="mt-4 inline-flex items-center gap-2 rounded-full border border-coral/20 bg-coral/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-coral">
+            <span>Connected</span>
+            <span id="connected-handle" class="rounded-full border border-coral/20 bg-[#131b22] px-2 py-1 text-coral">@{{ settings.bsky_handle or 'not configured' }}</span>
+          </div>
           <p class="mt-4 text-sm leading-6 text-ink/65 md:text-[15px]">
             Discover relevant creators from the people engaging with BlueSky conversations. Deliberate, observable, and rate-aware.
           </p>
         </div>
 
-        <div class="flex items-center gap-3 self-start rounded-full border border-ink/10 bg-white/5 px-4 py-2.5 text-sm shadow-sm md:self-end">
-          <button id="theme-toggle" class="mr-1 rounded-full border border-ink/10 bg-white/8 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition hover:-translate-y-0.5">Dark</button>
-          <span id="status-dot" class="h-2.5 w-2.5 rounded-full bg-ink/30"></span>
-          <span id="status-text" class="font-semibold text-ink">stopped</span>
-          <span id="mode" class="border-l border-ink/15 pl-3 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">dry run</span>
+        <div class="flex flex-col items-start gap-3 md:items-end">
+          <div class="flex flex-wrap items-center gap-3 self-start rounded-full border border-ink/10 bg-white/5 px-4 py-2.5 text-sm shadow-sm md:self-end">
+            <button id="theme-toggle" class="mr-1 rounded-full border border-ink/10 bg-white/8 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition hover:-translate-y-0.5">Dark</button>
+            <span id="status-dot" class="h-2.5 w-2.5 rounded-full bg-ink/30"></span>
+            <span id="status-text" class="font-semibold text-ink">stopped</span>
+            <span id="mode" class="border-l border-ink/15 pl-3 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">dry run</span>
+          </div>
+          <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink/50">
+            <span>Updated</span>
+            <span id="last-refresh" class="rounded-full border border-ink/10 bg-white/5 px-2 py-1 text-ink/70">--:--</span>
+          </div>
         </div>
       </div>
     </header>
+
+    <div id="error-banner" class="mb-6 hidden rounded-[22px] border border-coral/25 bg-coral/10 px-4 py-3 text-sm text-coral shadow-panel"></div>
 
     <section class="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <div class="stat-card rounded-[26px] p-4">
@@ -488,9 +730,9 @@
           </div>
           <span class="rounded-full bg-mint/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-ink">live</span>
         </div>
-        <div class="mini-chart mt-4">
-          <svg viewBox="0 0 220 80" aria-hidden="true">
-            <path d="M0 60 L45 52 L90 44 L120 48 L160 30 L220 18" stroke="#50c890" stroke-width="3"/>
+        <div class="mini-chart chart-grid mt-4 overflow-hidden rounded-[18px] border border-white/5">
+          <svg viewBox="0 0 220 80" aria-hidden="true" class="chart-glow">
+            <path id="chart-status" d="M0 60 L45 52 L90 44 L120 48 L160 30 L220 18" stroke="#50c890" stroke-width="3"/>
           </svg>
         </div>
       </div>
@@ -503,9 +745,9 @@
           </div>
           <span class="rounded-full bg-sky/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-ink">db</span>
         </div>
-        <div class="mini-chart mt-4">
-          <svg viewBox="0 0 220 80" aria-hidden="true">
-            <path d="M0 62 L40 58 L80 50 L120 40 L160 26 L220 22" stroke="#6aa9ff" stroke-width="3"/>
+        <div class="mini-chart chart-grid mt-4 overflow-hidden rounded-[18px] border border-white/5">
+          <svg viewBox="0 0 220 80" aria-hidden="true" class="chart-glow">
+            <path id="chart-targets" d="M0 62 L40 58 L80 50 L120 40 L160 26 L220 22" stroke="#6aa9ff" stroke-width="3"/>
           </svg>
         </div>
       </div>
@@ -518,9 +760,9 @@
           </div>
           <span class="rounded-full bg-lilac/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-ink">scan</span>
         </div>
-        <div class="mini-chart mt-4">
-          <svg viewBox="0 0 220 80" aria-hidden="true">
-            <path d="M0 50 L30 58 L70 48 L110 36 L150 30 L220 18" stroke="#d091ff" stroke-width="3"/>
+        <div class="mini-chart chart-grid mt-4 overflow-hidden rounded-[18px] border border-white/5">
+          <svg viewBox="0 0 220 80" aria-hidden="true" class="chart-glow">
+            <path id="chart-keywords" d="M0 50 L30 58 L70 48 L110 36 L150 30 L220 18" stroke="#d091ff" stroke-width="3"/>
           </svg>
         </div>
       </div>
@@ -533,16 +775,16 @@
           </div>
           <span class="rounded-full bg-coral/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-coral">guard</span>
         </div>
-        <div class="mini-chart mt-4">
-          <svg viewBox="0 0 220 80" aria-hidden="true">
-            <path d="M0 66 L42 54 L86 52 L125 42 L160 38 L220 14" stroke="#ff9d7d" stroke-width="3"/>
+        <div class="mini-chart chart-grid mt-4 overflow-hidden rounded-[18px] border border-white/5">
+          <svg viewBox="0 0 220 80" aria-hidden="true" class="chart-glow">
+            <path id="chart-mode" d="M0 66 L42 54 L86 52 L125 42 L160 38 L220 14" stroke="#ff9d7d" stroke-width="3"/>
           </svg>
         </div>
       </div>
     </section>
 
-    <section class="mb-8 grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-      <div class="space-y-5">
+    <section class="mb-8 grid min-w-0 gap-5 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
+      <div class="min-w-0 space-y-5">
         <div class="rounded-[28px] bg-ink p-6 text-white shadow-panel">
           <div class="mb-7 flex items-center justify-between">
             <h2 class="font-display text-2xl text-white">Control room</h2>
@@ -564,8 +806,8 @@
         <div class="glass rounded-[28px] p-6">
           <h2 class="font-display text-2xl text-ink">Target profile</h2>
 
-          <div class="mt-5 flex items-center justify-between rounded-2xl border border-ink/10 bg-white/5 px-4 py-3">
-            <div>
+          <div class="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-ink/10 bg-white/5 px-4 py-3">
+            <div class="min-w-0">
               <p class="text-sm font-bold text-ink">Dry run mode</p>
               <p id="dry-run-help" class="mt-1 text-xs text-ink/55">No accounts will be followed.</p>
             </div>
@@ -581,6 +823,15 @@
           <input id="max-followers" type="number" min="1" class="mt-2 w-full rounded-2xl border border-ink/10 bg-fog px-3.5 py-3 text-sm text-ink outline-none transition focus:border-coral focus:ring-2 focus:ring-coral/20" value="{{ settings.max_followers }}">
 
           <button onclick="saveSettings()" class="mt-5 w-full rounded-2xl bg-mint px-4 py-3 text-sm font-bold text-[#10212c] shadow-lg shadow-mint/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#b9f3d0] hover:text-[#10212c]">Apply filters</button>
+
+          <div class="mt-6 rounded-2xl border border-ink/10 bg-white/5 p-4">
+            <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-coral">Connected account</p>
+            <label class="mt-3 block text-[11px] font-bold uppercase tracking-[0.22em] text-ink/50">BlueSky handle</label>
+            <input id="account-handle" class="mt-2 w-full rounded-2xl border border-ink/10 bg-fog px-3.5 py-3 text-sm text-ink outline-none transition focus:border-coral focus:ring-2 focus:ring-coral/20" value="{{ settings.bsky_handle }}" placeholder="name.bsky.social">
+            <label class="mt-4 block text-[11px] font-bold uppercase tracking-[0.22em] text-ink/50">App password</label>
+            <input id="account-password" type="password" class="mt-2 w-full rounded-2xl border border-ink/10 bg-fog px-3.5 py-3 text-sm text-ink outline-none transition focus:border-coral focus:ring-2 focus:ring-coral/20" placeholder="Enter app password">
+            <button onclick="saveAccount()" class="mt-4 w-full rounded-2xl bg-coral px-4 py-3 text-sm font-bold text-white shadow-lg shadow-coral/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#ff9d8a]">Save account</button>
+          </div>
         </div>
 
         <div class="glass rounded-[28px] p-6">
@@ -598,28 +849,44 @@
         </div>
       </div>
 
-      <div class="glass rounded-[28px] p-6">
-        <div class="flex items-center justify-between gap-3">
+      <div class="glass min-w-0 self-start rounded-[28px] p-5 sm:p-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-coral">Activity stream</p>
-            <h2 class="font-display text-3xl text-ink">Live logs</h2>
+            <h2 class="font-display text-2xl text-ink md:text-3xl">Live logs</h2>
           </div>
-          <span id="target-count" class="rounded-full bg-mint px-3 py-1 text-[11px] font-bold text-ink">0 targets</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="hidden items-center gap-1.5 rounded-full border border-mint/20 bg-mint/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-mint sm:flex"><span class="h-1.5 w-1.5 rounded-full bg-mint shadow-[0_0_10px_rgba(80,200,144,0.9)]"></span>Live</span>
+            <span id="target-count" class="rounded-full bg-mint px-3 py-1 text-[11px] font-bold text-ink">0 targets</span>
+          </div>
         </div>
 
-        <div id="logs" class="panel-scroll mt-6 h-[360px] overflow-y-auto rounded-[22px] bg-ink p-4 font-mono text-[12px] leading-6 text-mint shadow-inner">
+        <div id="logs" class="panel-scroll mt-5 max-h-[320px] overflow-y-auto rounded-[22px] bg-ink p-2 font-mono text-[12px] text-mint shadow-inner md:max-h-[360px]">
           <div class="text-white/45">Waiting for worker activity...</div>
         </div>
-      </div>
-    </section>
 
-    <section class="glass rounded-[28px] p-5 md:p-6">
+        <section class="glass mt-5 rounded-[28px] p-5 md:p-6">
       <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-coral">Prospects</p>
           <h2 class="font-display text-3xl text-ink">Discovered creators</h2>
         </div>
         <a href="/api/export.csv" class="rounded-2xl border border-white/10 bg-white/8 px-4 py-2 text-center text-sm font-bold text-white transition duration-200 hover:bg-white hover:text-ink">Export CSV</a>
+      </div>
+
+      <div class="mb-5 grid gap-3 sm:grid-cols-3">
+        <div class="summary-tile">
+          <p>Total</p>
+          <strong id="summary-total">0</strong>
+        </div>
+        <div class="summary-tile">
+          <p>Followed</p>
+          <strong id="summary-followed" class="text-mint">0</strong>
+        </div>
+        <div class="summary-tile">
+          <p>Waiting</p>
+          <strong id="summary-pending" class="text-coral">0</strong>
+        </div>
       </div>
 
       <div class="overflow-x-auto">
@@ -635,6 +902,15 @@
           </thead>
           <tbody id="targets" class="divide-y divide-ink/10"></tbody>
         </table>
+      </div>
+      <div class="mt-5 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <span id="targets-page-label" class="text-[11px] font-bold uppercase tracking-[0.16em] text-ink/50">Page 1 of 1</span>
+        <div class="flex gap-2">
+          <button id="targets-prev" type="button" onclick="changeTargetsPage(-1)" class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-ink transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35">Previous</button>
+          <button id="targets-next" type="button" onclick="changeTargetsPage(1)" class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-ink transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35">Next</button>
+        </div>
+      </div>
+        </section>
       </div>
     </section>
   </main>
@@ -681,6 +957,22 @@
       const dry_run = document.getElementById('dry-run-toggle').getAttribute('aria-checked') === 'true';
       try {
         await request('/api/settings', { method: 'POST', body: JSON.stringify({ keywords, max_followers, dry_run }) });
+        refresh();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function saveAccount() {
+      const handle = document.getElementById('account-handle').value.trim().replace(/^@/, '');
+      const password = document.getElementById('account-password').value.trim();
+      if (!handle || !password) {
+        alert('Please enter both the BlueSky handle and App Password.');
+        return;
+      }
+      try {
+        await request('/api/account', { method: 'POST', body: JSON.stringify({ bsky_handle: handle, bsky_app_password: password }) });
+        document.getElementById('account-password').value = '';
         refresh();
       } catch (error) {
         alert(error.message);
@@ -747,28 +1039,87 @@
       return `<span class="status-badge ${colors[status] || 'status-discovered'}">${status.replace('_', ' ')}</span>`;
     }
 
-    async function refresh() {
-      try {
-        const data = await request('/api/status');
-        const keywordCount = document.getElementById('keywords').value.split(',').map(value => value.trim()).filter(Boolean).length;
+    const chartState = {
+      status: [60, 52, 44, 48, 30, 18],
+      targets: [62, 58, 50, 40, 26, 22],
+      keywords: [50, 58, 48, 36, 30, 18],
+      mode: [66, 54, 52, 42, 38, 14],
+    };
 
-        document.getElementById('status-text').textContent = data.status;
-        document.getElementById('status-dot').className = `h-2.5 w-2.5 rounded-full ${data.status === 'running' ? 'bg-mint' : data.status === 'error' ? 'bg-coral' : 'bg-white/30'}`;
-        document.getElementById('mode').textContent = data.dry_run ? 'dry run' : 'live mode';
-        document.getElementById('stat-status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-        document.getElementById('stat-targets').textContent = String(data.targets.length);
-        document.getElementById('stat-keywords').textContent = String(keywordCount);
-        document.getElementById('stat-mode').textContent = data.dry_run ? 'Dry run' : 'Live';
-        renderDryRun(data.dry_run);
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
 
-        document.getElementById('target-count').textContent = `${data.targets.length} targets`;
-        document.getElementById('logs').innerHTML = data.logs.length
-          ? data.logs.map(log => `<div><span class="text-white/40">${log.timestamp}</span> ${log.message}</div>`).join('')
-          : '<div class="text-white/45">Waiting for worker activity...</div>';
+    function pulseChartState() {
+      const time = Date.now() / 1000;
 
-        const rows = data.targets.map(item => `
+      chartState.status = chartState.status.map((point, index) => {
+        const wave = Math.sin(time * 2 + index * 0.9) * 4;
+        return clamp(point + wave * 0.45, 12, 74);
+      });
+
+      chartState.targets = chartState.targets.map((point, index) => {
+        const wave = Math.cos(time * 1.8 + index * 0.7) * 4.4;
+        return clamp(point + wave * 0.45, 12, 76);
+      });
+
+      chartState.keywords = chartState.keywords.map((point, index) => {
+        const wave = Math.sin(time * 2.4 + index * 1.2) * 3.6;
+        return clamp(point + wave * 0.45, 10, 72);
+      });
+
+      chartState.mode = chartState.mode.map((point, index) => {
+        const wave = Math.cos(time * 2.1 + index * 1.1) * 4.6;
+        return clamp(point + wave * 0.45, 10, 72);
+      });
+
+      animateChart('chart-status', chartState.status, '#50c890');
+      animateChart('chart-targets', chartState.targets, '#6aa9ff');
+      animateChart('chart-keywords', chartState.keywords, '#d091ff');
+      animateChart('chart-mode', chartState.mode, '#ff9d7d');
+    }
+
+    function animateChart(pathId, values, color) {
+      const svgPath = document.getElementById(pathId);
+      if (!svgPath) return;
+      const next = values.map((value, index) => {
+        const x = (index / (values.length - 1)) * 220;
+        const y = 80 - value;
+        return `${index === 0 ? 'M' : 'L'}${x} ${y}`;
+      }).join(' ');
+      svgPath.setAttribute('d', next);
+      svgPath.setAttribute('stroke', color);
+    }
+
+    function profileUrl(handle) {
+      if (!handle) return '#';
+      if (handle.startsWith('http://') || handle.startsWith('https://')) return handle;
+      return `https://bsky.app/profile/${encodeURIComponent(handle)}`;
+    }
+
+    const REFRESH_MS = 20000;
+    const CHART_TICK_MS = 1200;
+    let refreshTimer = null;
+    let chartTimer = null;
+    let lastLogsHtml = '';
+    let lastRowsHtml = '';
+    const TARGETS_PER_PAGE = 8;
+    let targetsPage = 1;
+    let targetsData = [];
+
+    function renderTargets() {
+      const totalPages = Math.max(1, Math.ceil(targetsData.length / TARGETS_PER_PAGE));
+      targetsPage = Math.min(targetsPage, totalPages);
+      const start = (targetsPage - 1) * TARGETS_PER_PAGE;
+      const pageTargets = targetsData.slice(start, start + TARGETS_PER_PAGE);
+      const rows = pageTargets.map(item => `
           <tr class="target-row align-middle transition duration-200">
-            <td class="px-3 font-bold text-ink">@${item.handle}</td>
+            <td class="px-3 font-bold text-ink">
+              <a href="${profileUrl(item.handle)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-coral underline decoration-coral/50 underline-offset-4 hover:text-[#ffb7a8]">
+                <span>@${item.handle}</span>
+                <span class="rounded-full border border-coral/20 bg-coral/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-coral">open</span>
+              </a>
+            </td>
             <td class="px-3 text-ink/70">${item.follower_count}</td>
             <td class="px-3 text-ink/60">${item.matched_keyword}</td>
             <td class="px-3">${badge(item.status)}</td>
@@ -776,14 +1127,114 @@
           </tr>
         `).join('');
 
-        document.getElementById('targets').innerHTML = rows || '<tr><td colspan="5" class="targets-empty px-3 py-10 text-center">No targets discovered yet.</td></tr>';
+      const rowsHtml = rows || '<tr><td colspan="5" class="targets-empty px-3 py-10 text-center">No targets discovered yet.</td></tr>';
+      if (rowsHtml !== lastRowsHtml) {
+        document.getElementById('targets').innerHTML = rowsHtml;
+        lastRowsHtml = rowsHtml;
+      }
+
+      document.getElementById('targets-page-label').textContent = targetsData.length
+        ? `Page ${targetsPage} of ${totalPages}`
+        : 'Page 0 of 0';
+      document.getElementById('targets-prev').disabled = targetsPage <= 1;
+      document.getElementById('targets-next').disabled = targetsPage >= totalPages || !targetsData.length;
+    }
+
+    function changeTargetsPage(direction) {
+      const totalPages = Math.max(1, Math.ceil(targetsData.length / TARGETS_PER_PAGE));
+      targetsPage = Math.min(Math.max(targetsPage + direction, 1), totalPages);
+      renderTargets();
+    }
+
+    function startAutoRefresh() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(() => {
+        if (!document.hidden) refresh();
+      }, REFRESH_MS);
+
+      if (chartTimer) clearInterval(chartTimer);
+      chartTimer = setInterval(() => {
+        if (!document.hidden) pulseChartState();
+      }, CHART_TICK_MS);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (refreshTimer) clearInterval(refreshTimer);
+      } else {
+        refresh();
+        startAutoRefresh();
+      }
+    });
+
+    async function refresh() {
+      try {
+        const data = await request('/api/status');
+        const keywordCount = document.getElementById('keywords').value.split(',').map(value => value.trim()).filter(Boolean).length;
+
+        document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const connectedHandle = data.account_handle || '{{ settings.bsky_handle or "not configured" }}';
+        document.getElementById('connected-handle').textContent = connectedHandle ? `@${connectedHandle.replace(/^@/, '')}` : 'not configured';
+        document.getElementById('status-text').textContent = data.status;
+        document.getElementById('status-dot').className = `h-2.5 w-2.5 rounded-full ${data.status === 'running' ? 'bg-mint' : data.status === 'error' ? 'bg-coral' : 'bg-white/30'}`;
+        document.getElementById('mode').textContent = data.dry_run ? 'dry run' : 'live mode';
+        document.getElementById('stat-status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+        document.getElementById('stat-targets').textContent = String(data.targets.length);
+        document.getElementById('stat-keywords').textContent = String(keywordCount);
+        document.getElementById('stat-mode').textContent = data.dry_run ? 'Dry run' : 'Live';
+
+        chartState.status = chartState.status.map((point, index) => Math.max(15, Math.min(72, point + (data.status === 'running' ? 2 : -1) + (index % 2 === 0 ? 1 : -1))));
+        chartState.targets = chartState.targets.map((point, index) => Math.max(12, Math.min(72, point + (data.targets.length > 0 ? 2 : -1) + (index % 3 === 0 ? 1 : -1))));
+        chartState.keywords = chartState.keywords.map((point, index) => Math.max(12, Math.min(72, point + (keywordCount > 0 ? 1 : -2) + (index % 2 === 0 ? 1 : -1))));
+        chartState.mode = chartState.mode.map((point, index) => Math.max(10, Math.min(70, point + (data.dry_run ? -1 : 2) + (index % 2 === 0 ? 1 : -1))));
+
+        animateChart('chart-status', chartState.status, '#50c890');
+        animateChart('chart-targets', chartState.targets, '#6aa9ff');
+        animateChart('chart-keywords', chartState.keywords, '#d091ff');
+        animateChart('chart-mode', chartState.mode, '#ff9d7d');
+
+        pulseChartState();
+
+        renderDryRun(data.dry_run);
+
+        const errorBanner = document.getElementById('error-banner');
+        if (data.last_error) {
+          errorBanner.textContent = `Last worker error: ${data.last_error}`;
+          errorBanner.classList.remove('hidden');
+        } else {
+          errorBanner.textContent = '';
+          errorBanner.classList.add('hidden');
+        }
+
+        const counts = data.target_counts || {};
+        const total = Number(counts.total ?? data.targets.length);
+        const followed = Number(counts.followed ?? data.targets.filter(item => item.status === 'followed').length);
+        const pending = Number(counts.pending ?? (total - followed));
+        document.getElementById('summary-total').textContent = String(total);
+        document.getElementById('summary-followed').textContent = String(followed);
+        document.getElementById('summary-pending').textContent = String(pending);
+
+        document.getElementById('target-count').textContent = `${total} targets`;
+
+        const recentLogs = (data.logs || []).slice(-80);
+        const logsHtml = recentLogs.length
+          ? recentLogs.map(log => `<div><span class="text-white/40">${log.timestamp}</span> ${log.message}</div>`).join('')
+          : '<div class="text-white/45">Waiting for worker activity...</div>';
+
+        if (logsHtml !== lastLogsHtml) {
+          document.getElementById('logs').innerHTML = logsHtml;
+          lastLogsHtml = logsHtml;
+        }
+
+        targetsData = data.targets;
+        renderTargets();
       } catch (error) {
         console.error(error);
       }
     }
 
     refresh();
-    setInterval(refresh, 5000);
+    startAutoRefresh();
   </script>
 </body>
 </html>
